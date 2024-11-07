@@ -1,0 +1,36 @@
+{
+  "name": "gpk-queue-worker",
+  "version": "1.0.0",
+  "description": "Queue worker system for GPK Dashboard",
+  "main": "javascript/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node javascript/app.js",
+    "dev": "concurrently \"npm run watch\" \"npm run start:dev\"",
+    "dev:all": "concurrently \"npm run dev\" \"npm run start:queue\"",
+    "start:dev": "nodemon javascript/app.js",
+    "start:queue": "node javascript/app.js",
+    "watch": "tsc --watch",
+    "build": "tsc",
+    "clean": "rimraf javascript/",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.43.5",
+    "bull": "^4.16.0",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^2.7.0",
+    "puppeteer": "^22.3.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/bull": "^4.10.0",
+    "@types/node": "^20.12.7",
+    "@types/node-fetch": "^2.6.11",
+    "@types/puppeteer": "^7.0.4",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.5"
+  }
+}
