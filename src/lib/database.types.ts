@@ -1593,6 +1593,7 @@ export interface Database {
           json_object: Json
           sync_type: Database["dashboard"]["Enums"]["sync_type"]
           sync_status: Database["dashboard"]["Enums"]["sync_status"]
+          error_description: string | null
         }
         Insert: {
           id?: number
@@ -1603,6 +1604,7 @@ export interface Database {
           json_object: Json
           sync_type: Database["dashboard"]["Enums"]["sync_type"]
           sync_status: Database["dashboard"]["Enums"]["sync_status"]
+          error_description?: string | null
         }
         Update: {
           id?: number
@@ -1613,6 +1615,7 @@ export interface Database {
           json_object?: Json
           sync_type?: Database["dashboard"]["Enums"]["sync_type"]
           sync_status?: Database["dashboard"]["Enums"]["sync_status"]
+          error_description?: string | null
         }
         Relationships: []
       }

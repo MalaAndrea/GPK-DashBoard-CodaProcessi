@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.43.5",
+    "axios": "^1.7.7",
     "bull": "^4.16.0",
     "dotenv": "^16.4.5",
     "node-fetch": "^2.7.0",
@@ -24,7 +25,9 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.4",
     "@types/bull": "^4.10.0",
+    "@types/express": "^5.0.0",
     "@types/node": "^20.12.7",
     "@types/node-fetch": "^2.6.11",
     "@types/puppeteer": "^7.0.4",
