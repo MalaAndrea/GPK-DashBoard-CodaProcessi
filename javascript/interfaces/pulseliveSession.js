@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import fetch from 'node-fetch';
 import { supabase } from './../config/config.js';
+import api from './../config/axiosConfig.js';
 export function processPulseliveSession(item) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -18,14 +19,11 @@ export function processPulseliveSession(item) {
             // ...
             console.log(`Elaborati i risultati per ${item.championship}`);
             // Crea un log di successo
-            yield supabase
-                .schema('dashboard')
-                .from('queue_log')
-                .insert({
+            yield api.post('/queue-log', {
                 queue_id: item.id,
-                log_type: 'SUCCESS',
+                log_type: 'UPDATED',
                 error_message: null,
-                error_stack: null
+                error_stack: null,
             });
             /*    .schema('dashboard')
                .from('queue_log')

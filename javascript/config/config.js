@@ -67,11 +67,11 @@ export function ottieniStatoCoda() {
                 logger.info('Code Attive:');
                 codeAttive.forEach(coda => {
                     logger.info(`  - ID: ${coda.id}
-    Tipo: ${coda.interface_type}
-    Intervallo: ${coda.interval_minutes} minuti
-    Ultima esecuzione: ${coda.last_run || 'Mai eseguita'}
-    Endpoint: ${coda.endpoint}
-    Championship: ${coda.championship || 'N/A'}`);
+                Tipo: ${coda.interface_type}
+                Intervallo: ${coda.interval_minutes} minuti
+                Ultima esecuzione: ${coda.last_run || 'Mai eseguita'}
+                Endpoint: ${coda.endpoint}
+                Championship: ${coda.championship || 'N/A'}`);
                 });
             }
             else {
@@ -82,10 +82,10 @@ export function ottieniStatoCoda() {
                 logger.info('Code Inattive:');
                 codeInattive.forEach(coda => {
                     logger.info(`  - ID: ${coda.id}
-    Tipo: ${coda.interface_type}
-    Intervallo: ${coda.interval_minutes} minuti
-    Endpoint: ${coda.endpoint}
-    Championship: ${coda.championship || 'N/A'}`);
+                Tipo: ${coda.interface_type}
+                Intervallo: ${coda.interval_minutes} minuti
+                Endpoint: ${coda.endpoint}
+                Championship: ${coda.championship || 'N/A'}`);
                 });
             }
             else {

@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { Tables } from './../lib/database.types';
 import { supabase } from './../config/config.js';
+import api from './../config/axiosConfig.js';
 
 type ProcessQueue = Tables<{ schema: 'dashboard' }, 'process_queue'>;
 
@@ -16,14 +17,11 @@ export async function processPulseliveSession(item: ProcessQueue) {
 
     // Crea un log di successo
 
-    await supabase
-    .schema('dashboard')
-    .from('queue_log')
-    .insert({
+    await api.post('/queue-log', {
       queue_id: item.id,
-      log_type: 'SUCCESS',
+      log_type: 'UPDATED',
       error_message: null,
-      error_stack: null
+      error_stack: null,
     });
 
    /*    .schema('dashboard')
