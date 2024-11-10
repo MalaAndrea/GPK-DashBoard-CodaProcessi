@@ -41,3 +41,4 @@ function handleDelete(payload) {
         yield removeQueue(deletedQueue.id);
     });
 }
+//# sourceMappingURL=supabaseHooks.js.map

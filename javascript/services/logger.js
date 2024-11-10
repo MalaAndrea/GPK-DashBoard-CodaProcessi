@@ -67,3 +67,4 @@ export const logQueue = {
     jobComplete: (queueName, jobId) => logger.debug(`Queue '${queueName}' completed job ${jobId}`),
     jobError: (queueName, jobId, error) => logger.error(`Queue '${queueName}' job ${jobId} error: ${error.message}`, { error }),
 };
+//# sourceMappingURL=logger.js.map

@@ -174,6 +174,7 @@ export interface PulseLive_Gap {
 
 export interface PulseLive_ClassificationEntry {
     id: string;
+    points: number;
     position: number;
     rider: PulseLive_Rider;
     team: PulseLive_Team;
@@ -182,7 +183,6 @@ export interface PulseLive_ClassificationEntry {
     gap: PulseLive_Gap;
     total_laps: number;
     time: string;
-    points: number;
     status: string;
 }
 

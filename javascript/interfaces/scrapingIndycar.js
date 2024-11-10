@@ -40,3 +40,4 @@ function esploraClassificaIndyCar() {
     });
 }
 esploraClassificaIndyCar();
+//# sourceMappingURL=scrapingIndycar.js.map

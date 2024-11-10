@@ -31,20 +31,16 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 // Inserimento di un nuovo result_driver
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { result_id, team_season_drivers_id, synchronized } = req.body;
+    const newResultDriver = req.body;
     const { data, error } = yield supabase
         .from('result_drivers')
-        .insert([{
-            result_id,
-            team_season_drivers_id,
-            synchronized
-        }]);
+        .insert(newResultDriver);
     if (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
     }
     else {
-        res.status(201).json(data);
+        res.status(201).json({ id: newResultDriver.id });
     }
 }));
 // Modifica di un result_driver esistente
@@ -79,3 +75,4 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 }));
 export default router;
+//# sourceMappingURL=resultDrivers.js.map

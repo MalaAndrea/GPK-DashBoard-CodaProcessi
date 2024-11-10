@@ -52,24 +52,17 @@ router.get('/', async (req: any, res: any) => {
 
 // Inserimento di un nuovo risultato
 router.post('/', async (req, res) => {
-    const { id, race_session_id, position, points, pole, retired } = req.body;
+    const newResult = req.body;
 
     const { data, error } = await supabase
         .from('results')
-        .insert([{
-            id,
-            race_session_id,
-            position,
-            points,
-            pole,
-            retired
-        }]);
+        .insert(newResult);
 
     if (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
     } else {
-        res.status(201).json(data);
+        res.status(201).json({ id: newResult.id });
     }
 });
 

@@ -24,20 +24,20 @@ export async function fetchAndInsertResults(session: PulseLive_Session, currentS
     console.log('----------------------------------------------------------------------------------');
     console.log('Risultati ottenuti per le gare:', currentSeasonId, numeroRound);
 
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    //await new Promise(resolve => setTimeout(resolve, 10000));
 
     for (const risultato of risultati) {
         console.log(`Rider Name : ${risultato.rider.number} ${currentSeasonId}`);
-        const driver = await api.get(`/drivers/driver-by-number?driverNumber=${risultato.rider.number}&championshipId=${currentSeasonId}`);
+        const driver = await api.get(`/drivers/teamseasondriver-by-number?driverNumber=${risultato.rider.number}&championshipId=${currentSeasonId}`);
         if (driver.data) {
-            await insertResultsDriver(driver.data.id, risultato, session, results_racesessionresults.data);
+            await insertResultsDriver(driver.data.id, risultato, session, results_racesessionresults.data[0]);
         }
         
         //TODO: sara da aggiungere il pilota
     }
 }
 
-export async function insertResultsDriver(driverId: string, risultato: PulseLive_ClassificationEntry, session: PulseLive_Session, race_sessions_results: race_sessions_results) {
+export async function insertResultsDriver(team_season_drivers_id: string, risultato: PulseLive_ClassificationEntry, session: PulseLive_Session, race_sessions_results: race_sessions_results) {
 
     if (!(session.type === 'FP' || session.type === 'PR' || session.type === 'Q' || session.type === 'Q')) {
         return;
@@ -45,7 +45,7 @@ export async function insertResultsDriver(driverId: string, risultato: PulseLive
     if (session.type === 'Q' && session.number === 1) {
         return;
     }
-    if (!race_sessions_results || !Array.isArray(race_sessions_results.race_sessions)) {
+    if (race_sessions_results.race_sessions.length === 0) {
         console.error('race_sessions_results o race_sessions non sono definiti o non sono un array');
         return;
     }
@@ -59,14 +59,15 @@ export async function insertResultsDriver(driverId: string, risultato: PulseLive
 
 
     const resultId = uuidv4();
+    const points = risultato.points ? risultato.points : 0;
     //devo creare prima results e poi result_drivers
     try {
-        const result = await api.put('/results', {
+        const result = await api.post('/results', {
             id: resultId,
             created_at: new Date().toISOString(),
             deleted_at: null,
             last_modified_at: new Date().toISOString(),
-            points: risultato.points,
+            points: points,
             pole: false,
             position: risultato.position,
             race_session_id: sessionId,
@@ -75,12 +76,14 @@ export async function insertResultsDriver(driverId: string, risultato: PulseLive
             synchronized: false
         });
 
-        //creo result_drivers
-        const result_driver = await api.put('/result_drivers', {
-            id: uuidv4(),
-            result_id: resultId,
-            driver_id: driverId,
-        });
+        if (result.data) {
+            //creo result_drivers
+            const result_driver = await api.post('/result-drivers', {
+                id: uuidv4(),
+                result_id: resultId,
+                team_season_drivers_id: team_season_drivers_id,
+            });
+        }
 
     } catch (error) {
         console.error(error);

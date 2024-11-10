@@ -34,3 +34,4 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     return res.status(201).json(data);
 }));
 export default router;
+//# sourceMappingURL=queue_log.js.map

@@ -325,6 +325,7 @@ export interface Database {
           name: string
           photo_url: string | null
           updated_at: string
+          synchronized: boolean
         }
         Insert: {
           country_id: string
@@ -338,6 +339,7 @@ export interface Database {
           name: string
           photo_url?: string | null
           updated_at?: string
+          synchronized?: boolean
         }
         Update: {
           country_id?: string
@@ -351,6 +353,7 @@ export interface Database {
           name?: string
           photo_url?: string | null
           updated_at?: string
+          synchronized?: boolean
         }
         Relationships: [
           {

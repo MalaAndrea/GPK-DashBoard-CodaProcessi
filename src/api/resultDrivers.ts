@@ -29,21 +29,17 @@ router.get('/', async (req, res) => {
 
 // Inserimento di un nuovo result_driver
 router.post('/', async (req, res) => {
-    const { result_id, team_season_drivers_id, synchronized } = req.body;
+    const newResultDriver = req.body;
 
     const { data, error } = await supabase
         .from('result_drivers')
-        .insert([{
-            result_id,
-            team_season_drivers_id,
-            synchronized
-        }]);
+        .insert(newResultDriver);
 
     if (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
     } else {
-        res.status(201).json(data);
+        res.status(201).json({ id: newResultDriver.id });
     }
 });
 

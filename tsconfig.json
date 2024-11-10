@@ -7,6 +7,7 @@
     "outDir": "./javascript",
     "esModuleInterop": true,
     "strict": true,
+    "sourceMap": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },

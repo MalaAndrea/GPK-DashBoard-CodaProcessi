@@ -135,3 +135,4 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.status(200).json({ race: existingRace || raceData, sessions: sessionsData });
 }));
 export default router;
+//# sourceMappingURL=races.js.map

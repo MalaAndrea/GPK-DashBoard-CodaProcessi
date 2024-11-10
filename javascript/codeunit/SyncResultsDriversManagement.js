@@ -21,18 +21,18 @@ export function fetchAndInsertResults(session, currentSeasonId, numeroRound) {
         const results_racesessionresults = yield api.get(`/races/race-sessions-results?championship_id=${currentSeasonId}&round=${numeroRound}`);
         console.log('----------------------------------------------------------------------------------');
         console.log('Risultati ottenuti per le gare:', currentSeasonId, numeroRound);
-        yield new Promise(resolve => setTimeout(resolve, 10000));
+        //await new Promise(resolve => setTimeout(resolve, 10000));
         for (const risultato of risultati) {
             console.log(`Rider Name : ${risultato.rider.number} ${currentSeasonId}`);
-            const driver = yield api.get(`/drivers/driver-by-number?driverNumber=${risultato.rider.number}&championshipId=${currentSeasonId}`);
+            const driver = yield api.get(`/drivers/teamseasondriver-by-number?driverNumber=${risultato.rider.number}&championshipId=${currentSeasonId}`);
             if (driver.data) {
-                yield insertResultsDriver(driver.data.id, risultato, session, results_racesessionresults.data);
+                yield insertResultsDriver(driver.data.id, risultato, session, results_racesessionresults.data[0]);
             }
             //TODO: sara da aggiungere il pilota
         }
     });
 }
-export function insertResultsDriver(driverId, risultato, session, race_sessions_results) {
+export function insertResultsDriver(team_season_drivers_id, risultato, session, race_sessions_results) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!(session.type === 'FP' || session.type === 'PR' || session.type === 'Q' || session.type === 'Q')) {
             return;
@@ -40,7 +40,7 @@ export function insertResultsDriver(driverId, risultato, session, race_sessions_
         if (session.type === 'Q' && session.number === 1) {
             return;
         }
-        if (!race_sessions_results || !Array.isArray(race_sessions_results.race_sessions)) {
+        if (race_sessions_results.race_sessions.length === 0) {
             console.error('race_sessions_results o race_sessions non sono definiti o non sono un array');
             return;
         }
@@ -50,14 +50,15 @@ export function insertResultsDriver(driverId, risultato, session, race_sessions_
             return; // Handle case where session does not exist
         }
         const resultId = uuidv4();
+        const points = risultato.points ? risultato.points : 0;
         //devo creare prima results e poi result_drivers
         try {
-            const result = yield api.put('/results', {
+            const result = yield api.post('/results', {
                 id: resultId,
                 created_at: new Date().toISOString(),
                 deleted_at: null,
                 last_modified_at: new Date().toISOString(),
-                points: risultato.points,
+                points: points,
                 pole: false,
                 position: risultato.position,
                 race_session_id: sessionId,
@@ -65,12 +66,14 @@ export function insertResultsDriver(driverId, risultato, session, race_sessions_
                 updated_at: new Date().toISOString(),
                 synchronized: false
             });
-            //creo result_drivers
-            const result_driver = yield api.put('/result_drivers', {
-                id: uuidv4(),
-                result_id: resultId,
-                driver_id: driverId,
-            });
+            if (result.data) {
+                //creo result_drivers
+                const result_driver = yield api.post('/result-drivers', {
+                    id: uuidv4(),
+                    result_id: resultId,
+                    team_season_drivers_id: team_season_drivers_id,
+                });
+            }
         }
         catch (error) {
             console.error(error);
@@ -100,3 +103,4 @@ export function getThursdayAndMondayDates(oggi) {
     }
     return { thursday, monday };
 }
+//# sourceMappingURL=SyncResultsDriversManagement.js.map

@@ -6,18 +6,23 @@ const router: Router = Router();
 
 
 router.get('/', async (req: any, res: any) => {
-    const { championship_id } = req.query;
-    console.log('championship_id:', championship_id);
+    const { championship_id, round } = req.query;
 
     if (!championship_id) {
         return res.status(400).send('Championship ID is required');
     }
 
-    const { data, error } = await supabase
+    const query = supabase
         .from('races')
         .select('*')
         .order('round', { ascending: true })
         .eq('championship_id', championship_id);
+
+    if (round) {
+        query.eq('round', round);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
         console.error(error);

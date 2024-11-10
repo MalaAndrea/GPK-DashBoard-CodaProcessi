@@ -14,3 +14,4 @@ router.use('/results', resultsApi);
 router.use('/result-drivers', resultDriversApi);
 router.use('/races', racesApi);
 export default router;
+//# sourceMappingURL=apiRoutes.js.map
