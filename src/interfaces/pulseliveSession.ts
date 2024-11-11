@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 type ProcessQueue = Tables<{ schema: "dashboard" }, "process_queue">;
 type Race = Tables<'races'>;
+type RaceSession = Tables<'race_sessions'>;
 
 async function upsertRace(PulseLive_Event: PulseLive_Event, round: number, championshipId: string | null): Promise<string | null> {
   let raceId = null
@@ -28,45 +29,75 @@ async function upsertRace(PulseLive_Event: PulseLive_Event, round: number, champ
     return race.data[0].id;
   } else {
     //da trovare prima il circuito
-    const circuit = await api.get(`/circuits?id=${PulseLive_Event.circuit.id}`);
-    if (circuit.data) {
+    let circuit = null;
+    try {
+      circuit = await api.get(`/circuits?id=${PulseLive_Event.circuit.id}`);
+    } catch (error) {
+      console.error(error);
+    }
+    if (circuit && circuit.data) {
       circuitId = circuit.data.id;
     } else {
       circuitId = PulseLive_Event.circuit.id;
+      const countryId = await getCountryId(PulseLive_Event.circuit.nation);
       await api.post(`/circuits`, {
         id: circuitId,
         name: PulseLive_Event.circuit.name,
+        location: PulseLive_Event.circuit.place,
+        country_id: countryId,
+        lat: 0,
+        long: 0
       });
     }
 
     //creo la gara 
-    raceId = uuidv4();
-    await api.post(`/races`, {
-      id: raceId,
-      championship_id: championshipId,
-      circuit_id: circuitId,
-      round: round,
-      name: PulseLive_Event.circuit.name,
-      location: PulseLive_Event.circuit.place,
-      country_id: await getCountryId(PulseLive_Event.circuit.nation),
-    });
+    if (circuitId) {
+      raceId = uuidv4();
+      await api.post(`/races/newRace`, {
+        id: raceId,
+        championship_id: championshipId,
+        circuit_id: circuitId,
+        season_id: 2024,
+        round: round,
+        name: PulseLive_Event.circuit.name,
+      });
+    }
   }
 
   return raceId;
 }
 
-async function upsertSession(PulseLive_Event: PulseLive_Event, raceId: string | null, championshipId: string | null) {
+async function insertSession(PulseLive_Event: PulseLive_Event, raceId: string | null, championshipId: string | null) {
 
-  //https://api.motogp.pulselive.com/motogp/v1/results/sessions?eventUuid=1cc0f19e-b77d-4bf5-8ca1-221b49a83593&categoryUuid=e8c110ad-64aa-4e8e-8a86-f2f152f6a942
   const sessions_pulselive = (await api.get(`/sessions?eventUuid=${PulseLive_Event.id}&categoryUuid=${championshipId}`)).data;
-  const sessions = (await api.get(`/racesessions?race_id=${raceId}`)).data;
+  const sessions: RaceSession[] = (await api.get(`/racesessions?race_id=${raceId}`)).data;
 
   let recordCount = 0;
   if (sessions_pulselive.data.length > 0) {
-    for (const session of sessions.data) {
+    for (const session of sessions) {
       recordCount++;
-      if (sessions_pulselive[recordCount]) {
-        console.log(session);
+      const sessione_pulselive_name = sessions_pulselive[recordCount].number === 0 ? sessions_pulselive[recordCount].name : sessions_pulselive[recordCount].name + ' - ' + sessions_pulselive[recordCount].number;
+      if (sessions[recordCount]) {
+        if (sessions_pulselive[recordCount].date !== sessions[recordCount].date) {
+          await api.put(`/racesessions/${sessions[recordCount].id}`, {
+            date: sessions_pulselive[recordCount].date,
+          });
+        }
+        if (sessione_pulselive_name !== sessions[recordCount].name) {
+          await api.put(`/racesessions/${sessions[recordCount].id}`, {
+            name: sessione_pulselive_name,
+          });
+        }
+      } else {
+        //inserisco la sessione
+        await api.post(`/racesessions`, {
+          id: uuidv4(),
+          round: recordCount,
+          race_id: raceId,
+          date: sessions_pulselive[recordCount].date,
+          name: sessione_pulselive_name,
+          include_statistic: sessions_pulselive[recordCount].type === 'RACE' || sessions_pulselive[recordCount].type === 'SPR' ? true : false
+        });
       }
     }
   }
@@ -76,7 +107,7 @@ async function upsertSession(PulseLive_Event: PulseLive_Event, raceId: string | 
 //funzione che dato un codice iso3 prende l'id del country
 async function getCountryId(iso3: string) {
   const country = await api.get(`/countries?iso3=${iso3}`);
-  return country.data.id;
+  return country.data ? country.data[0].id : null;
 }
 
 export async function processPulseliveSession(item: ProcessQueue) {
@@ -109,7 +140,7 @@ export async function processPulseliveSession(item: ProcessQueue) {
 
       //inserisco le sessioni
       if (raceId) {
-        await upsertSession(event, raceId, item.championship_id);
+        await insertSession(event, raceId, item.championship_id);
       }
     }
 

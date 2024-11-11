@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { supabase } from '../config/config.js';
 import { TablesInsert } from '../lib/database.types';
+import { Tables } from '../lib/database.types';
 
 const router: Router = Router();
+
+type Race = Tables<'races'>;
 
 
 router.get('/', async (req: any, res: any) => {
@@ -98,6 +101,20 @@ router.put('/:id', async (req: any, res: any) => {
     } else {
         res.status(200).json(data);
     }
+});
+
+
+router.post('/newRace', async (req: any, res: any) => {
+    const newRace: Partial<Race> = req.body;
+    const { data, error } = await supabase
+        .from('races')
+        .insert(newRace)
+        .select();
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+    return res.status(201).json(data);
 });
 
 router.post('/', async (req: any, res: any) => {

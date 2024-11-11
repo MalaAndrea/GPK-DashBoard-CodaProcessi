@@ -11,16 +11,19 @@ import { Router } from 'express';
 import { supabase } from '../config/config.js';
 const router = Router();
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { championship_id } = req.query;
-    console.log('championship_id:', championship_id);
+    const { championship_id, round } = req.query;
     if (!championship_id) {
         return res.status(400).send('Championship ID is required');
     }
-    const { data, error } = yield supabase
+    const query = supabase
         .from('races')
         .select('*')
         .order('round', { ascending: true })
         .eq('championship_id', championship_id);
+    if (round) {
+        query.eq('round', round);
+    }
+    const { data, error } = yield query;
     if (error) {
         console.error(error);
         res.status(500).send(error.message);
@@ -83,6 +86,17 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     else {
         res.status(200).json(data);
     }
+}));
+router.post('/newRace', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const newRace = req.body;
+    const { data, error } = yield supabase
+        .from('races')
+        .insert(newRace)
+        .select();
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+    return res.status(201).json(data);
 }));
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Request Headers: ", req.headers);

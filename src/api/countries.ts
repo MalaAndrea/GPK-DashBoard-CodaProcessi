@@ -5,7 +5,10 @@ const router: Router = Router();
 
 router.get('/', async (req: any, res: any) => {
     const iso3 = req.query.iso3;
-    let query = supabase.from('countries').select('*');
+    let query = supabase
+        .schema('public')
+        .from('countries')
+        .select('*');
 
     if (iso3) {
         query = query.eq('iso3', iso3);
