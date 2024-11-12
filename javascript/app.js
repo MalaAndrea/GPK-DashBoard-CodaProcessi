@@ -33,7 +33,7 @@ function bootstrap() {
             setupSupabaseHooks();
             logger.info('Hook Supabase configurati');
             const app = express();
-            const PORT = process.env.PORT || 3000;
+            const PORT = /*process.env.PORT ||*/ 3000;
             // Middleware per il parsing del corpo delle richieste
             app.use(express.json());
             // Utilizza le rotte API

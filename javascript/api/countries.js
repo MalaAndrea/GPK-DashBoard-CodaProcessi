@@ -17,7 +17,8 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         .from('countries')
         .select('*');
     if (iso3) {
-        query = query.eq('iso3', iso3);
+        query = query.eq('iso3_api', iso3)
+            .limit(1);
     }
     const { data, error } = yield query;
     if (error) {
@@ -27,6 +28,17 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     else {
         res.status(200).json(data);
     }
+}));
+router.put('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const country = req.body;
+    const { data, error } = yield supabase
+        .from('countries')
+        .update(country)
+        .eq('id', country.id);
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+    return res.status(201).json(data);
 }));
 export default router;
 //# sourceMappingURL=countries.js.map

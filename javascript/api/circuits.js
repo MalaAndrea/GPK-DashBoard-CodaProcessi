@@ -34,6 +34,23 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.status(500).send('Errore del server');
     }
 }));
+// Nuova rotta per verificare l'esistenza di un circuito
+router.get('/exists', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.query;
+    if (!id) {
+        return res.status(400).json({ error: 'ID non fornito' });
+    }
+    const { data, error } = yield supabase
+        .from('circuits')
+        .select('id')
+        .eq('id', id)
+        .limit(1);
+    if (error) {
+        console.error(error);
+        return res.status(500).json({ error: error.message });
+    }
+    return res.status(200).json({ exists: data && data.length > 0 });
+}));
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const newCircuit = req.body;
     const { data, error } = yield supabase

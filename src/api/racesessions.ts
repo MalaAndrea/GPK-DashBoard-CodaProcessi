@@ -31,6 +31,18 @@ router.get('/', async (req: any, res: any) => {
 router.post('/', async (req: any, res: any) => {
     const newRaceSession = req.body;
 
+    // Verifica se ci sono campi richiesti mancanti
+    const missingFields = [];
+    if (!newRaceSession.race_id) missingFields.push('race_id');
+    if (!newRaceSession.name) missingFields.push('name');
+    if (!newRaceSession.date) missingFields.push('date');
+    if (!newRaceSession.round) missingFields.push('round');
+
+    if (missingFields.length > 0) {
+        console.log('Missing required fields:', missingFields.join(', '));
+        return res.status(400).send('Missing required fields: ' + missingFields.join(', '));
+    }
+
     const { data, error } = await supabase
         .from('race_sessions')
         .insert(newRaceSession)

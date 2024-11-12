@@ -376,6 +376,7 @@ export interface Database {
           name: string
           region: string | null
           updated_at: string
+          iso3_api: string | null
         }
         Insert: {
           created_at?: string
@@ -387,6 +388,7 @@ export interface Database {
           name: string
           region?: string | null
           updated_at?: string
+          iso3_api?: string | null
         }
         Update: {
           created_at?: string
@@ -398,6 +400,7 @@ export interface Database {
           name?: string
           region?: string | null
           updated_at?: string
+          iso3_api?: string | null
         }
         Relationships: []
       }

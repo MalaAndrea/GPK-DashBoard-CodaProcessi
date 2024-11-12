@@ -105,7 +105,7 @@ router.put('/:id', async (req: any, res: any) => {
 
 
 router.post('/newRace', async (req: any, res: any) => {
-    const newRace: Partial<Race> = req.body;
+    const newRace: Race = req.body;
     const { data, error } = await supabase
         .from('races')
         .insert(newRace)
