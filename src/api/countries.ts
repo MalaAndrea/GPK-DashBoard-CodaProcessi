@@ -7,7 +7,7 @@ const router: Router = Router();
 type Country = Tables<'countries'>;
 
 router.get('/', async (req: any, res: any) => {
-    const iso3 = req.query.iso3;
+    const {iso3, iso2} = req.query;
     let query = supabase
         .schema('public')
         .from('countries')
@@ -15,6 +15,10 @@ router.get('/', async (req: any, res: any) => {
 
     if (iso3) {
         query = query.eq('iso3_api', iso3)
+            .limit(1);
+    }
+    if (iso2) {
+        query = query.eq('iso2', iso2)
             .limit(1);
     }
 

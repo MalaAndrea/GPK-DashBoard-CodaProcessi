@@ -199,30 +199,6 @@ export function processPulseliveSession(item) {
             catch (error) {
                 console.error(error);
             }
-            /*  const response = await fetch(item.endpoint);
-             const data = await response.json();
-         
-             // Elabora i dati e salvali nel database
-             // ...
-         
-             console.log(`Elaborati i risultati per ${item.championship}`);
-         
-             // Crea un log di successo
-         
-             await api.post("/queue-log", {
-               queue_id: item.id,
-               log_type: "UPDATED",
-               error_message: null,
-               error_stack: null,
-             }); */
-            /*    .schema('dashboard')
-              .from('queue_log')
-              .insert({
-                queue_id: item.id,
-                log_type: 'SUCCESS',
-                error_message: null,
-                error_stack: null
-              }); */
         }
         catch (error) {
             console.error(`Errore nell'elaborazione dei risultati per ${item.championship}:`, error instanceof Error ? error.message : error);

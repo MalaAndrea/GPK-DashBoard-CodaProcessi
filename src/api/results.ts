@@ -8,7 +8,7 @@ type results = Tables<'results'>;
 
 
 router.get('/', async (req: any, res: any) => {
-    const { race_session_id, id } = req.query;
+    const { race_session_id, id, position } = req.query;
     console.log('race_session_id:', race_session_id);
     console.log('id:', id);
 
@@ -37,6 +37,9 @@ router.get('/', async (req: any, res: any) => {
         query = query.eq('race_session_id', race_session_id).order('position', { ascending: true });
     } else if (id) {
         query = query.eq('id', id);
+    }
+    if (position) {
+        query = query.eq('position', position);
     }
 
     const { data, error } = await query;

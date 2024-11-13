@@ -122,9 +122,9 @@ router.get('/teamseasondriver-by-number', (req, res) => __awaiter(void 0, void 0
     if (error) {
         return res.status(500).json({ error: error.message });
     }
-    // Se non viene trovato il pilota, restituisci un errore 404
+    // Se non viene trovato il pilota, restituisci null invece di un errore 404
     if (!data || data.length === 0) {
-        return res.status(404).json({ error: 'Driver not found' });
+        return res.status(200).json(null); // Restituisci null
     }
     return res.status(200).json(data[0]); // Restituisci solo il pilota specifico
 }));

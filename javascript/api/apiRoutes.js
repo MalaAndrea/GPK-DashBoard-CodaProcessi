@@ -7,7 +7,9 @@ import resultDriversApi from './resultDrivers.js';
 import racesApi from './races.js';
 import countriesApi from './countries.js';
 import circuitsApi from './circuits.js';
+import teamsApi from './teams.js';
 import racesessionsApi from './racesessions.js';
+import teamseasondriverApi from './teamseasondriver.js';
 const router = Router();
 // Definisci le rotte per le code di processo
 router.use('/process-queue', processQueueApi);
@@ -19,5 +21,7 @@ router.use('/races', racesApi);
 router.use('/circuits', circuitsApi);
 router.use('/countries', countriesApi);
 router.use('/racesessions', racesessionsApi);
+router.use('/teams', teamsApi);
+router.use('/team-season-drivers', teamseasondriverApi);
 export default router;
 //# sourceMappingURL=apiRoutes.js.map

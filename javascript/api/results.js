@@ -11,7 +11,7 @@ import { Router } from 'express';
 import { supabase } from '../config/config.js';
 const router = Router();
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { race_session_id, id } = req.query;
+    const { race_session_id, id, position } = req.query;
     console.log('race_session_id:', race_session_id);
     console.log('id:', id);
     if (!race_session_id && !id) {
@@ -38,6 +38,9 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     else if (id) {
         query = query.eq('id', id);
+    }
+    if (position) {
+        query = query.eq('position', position);
     }
     const { data, error } = yield query;
     if (error) {

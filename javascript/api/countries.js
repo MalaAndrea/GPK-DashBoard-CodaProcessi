@@ -11,13 +11,17 @@ import { Router } from 'express';
 import { supabase } from '../config/config.js';
 const router = Router();
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const iso3 = req.query.iso3;
+    const { iso3, iso2 } = req.query;
     let query = supabase
         .schema('public')
         .from('countries')
         .select('*');
     if (iso3) {
         query = query.eq('iso3_api', iso3)
+            .limit(1);
+    }
+    if (iso2) {
+        query = query.eq('iso2', iso2)
             .limit(1);
     }
     const { data, error } = yield query;
