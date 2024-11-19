@@ -9,6 +9,8 @@ type ProcessQueue = Tables<{ schema: 'dashboard' }, 'process_queue'>;
 export async function processPulseliveResult(item: ProcessQueue) {
   console.log('Inizio elaborazione dei risultati Pulselive:', new Date().toISOString());
 
+  const totalResults = true;
+
   try {
     // Chiamata per ottenere le stagioni
     const seasonsResponse = await fetch('https://api.motogp.pulselive.com/motogp/v1/results/seasons');
@@ -17,7 +19,7 @@ export async function processPulseliveResult(item: ProcessQueue) {
 
     // Prendi l'ID della stagione più recente
     const currentSeason = seasons.find(season => season.current) || seasons[0];
-    const currentSeasonId = currentSeason.id;
+    const currentSeasonId = 'dd12382e-1d9f-46ee-a5f7-c5104db28e43'; //const currentSeasonId = currentSeason.id;
     console.log('ID della stagione corrente:', currentSeasonId);
 
     // Chiamata per ottenere gli eventi della stagione corrente
@@ -29,51 +31,88 @@ export async function processPulseliveResult(item: ProcessQueue) {
 
     //trovo il numero di round dell'ultima gara e escludo i test
     const eventiNonTest = allEvents.filter(event => !event.test);
-    const eventiFiltrati = eventiNonTest.filter(event => {
+    const eventiFiltrati = totalResults ? eventiNonTest : eventiNonTest.filter(event => {
       const dataEvento = new Date(event.date_start);
       return dataEvento >= treGiorniFa && dataEvento <= oggi;
     });
 
+
+    let latestEventId = null;
     //Prendo l'ultima gara
-    let numeroRound = 0;
-    const ultimoEvento = eventiFiltrati[eventiFiltrati.length - 1];
-    if (ultimoEvento) {
-      console.log('Ultimo evento nell\'intervallo:', ultimoEvento.name, ' Questo è il round numero:', numeroRound, 'con id:', ultimoEvento.id);
-      numeroRound = eventiNonTest
-        .filter(event => {
-          const dataEvento = new Date(event.date_start);
-          return dataEvento <= new Date(ultimoEvento.date_start);
-        })
-        .length;
-    } else {
-      console.log('Nessun evento trovato nell\'intervallo');
-    }
-    //console.log('tre giorni fa:', treGiorniFa);
-    const latestEventId = ultimoEvento.id;
-
-
-    // Chiamata per ottenere le sessioni dell'ultimo evento
-    const sessionsResponse = await fetch(`https://api.motogp.pulselive.com/motogp/v1/results/sessions?eventUuid=${latestEventId}&categoryUuid=${item.championship}`);
-    const sessions = await sessionsResponse.json() as PulseLive_Session[];
-    //console.log('Sessioni ottenute per l\'ultimo evento:', sessions.length);
-
-
-    // Leggi tutte le sessioni e lancia la funzione InsertSessionResults
-    const oraAttuale = new Date();
-    let count = 0;
-    for (const session of sessions) {
-      //const dataSessione = new Date(session.date);
-      //if (dataSessione.getTime() + 3600000 < oraAttuale.getTime()) {
-      console.log('SESSION --------------------------------------------------------------');
-      console.log('Elaborazione risultati sessione:', session.type, 'id:', session.id, 'con numero round:', numeroRound);
-      try {
-        await fetchAndInsertResults(session, count, item.championship_id, numeroRound);
-      } catch (error) {
-        console.error(error);
+    if (!totalResults) {
+      let numeroRound = 0;
+      const ultimoEvento = eventiFiltrati[eventiFiltrati.length - 1];
+      if (ultimoEvento) {
+        console.log('Ultimo evento nell\'intervallo:', ultimoEvento.name, ' Questo è il round numero:', numeroRound, 'con id:', ultimoEvento.id);
+        numeroRound = eventiNonTest
+          .filter(event => {
+            const dataEvento = new Date(event.date_start);
+            return dataEvento <= new Date(ultimoEvento.date_start);
+          })
+          .length;
+      } else {
+        console.log('Nessun evento trovato nell\'intervallo');
       }
-      count++;
-      //}
+      //console.log('tre giorni fa:', treGiorniFa);
+      latestEventId = ultimoEvento.id;
+
+      // Chiamata per ottenere le sessioni dell'ultimo evento
+      const sessionsResponse = await fetch(`https://api.motogp.pulselive.com/motogp/v1/results/sessions?eventUuid=${latestEventId}&categoryUuid=${item.championship}`);
+      const sessions = await sessionsResponse.json() as PulseLive_Session[];
+      //console.log('Sessioni ottenute per l\'ultimo evento:', sessions.length);
+
+
+      // Leggi tutte le sessioni e lancia la funzione InsertSessionResults
+      const oraAttuale = new Date();
+      let count = 0;
+      for (const session of sessions) {
+        //const dataSessione = new Date(session.date);
+        //if (dataSessione.getTime() + 3600000 < oraAttuale.getTime()) {
+        console.log('SESSION --------------------------------------------------------------');
+        console.log('Elaborazione risultati sessione:', session.type, 'id:', session.id, 'con numero round:', numeroRound);
+        try {
+          await fetchAndInsertResults(session, count, item.championship_id, numeroRound);
+        } catch (error) {
+          console.error(error);
+        }
+        count++;
+        //}
+      }
+
+    } else {
+      console.log('Elaborazione risultati totali');
+      let numeroRound = 0;
+      for (const event of eventiFiltrati) {
+        numeroRound++;
+        latestEventId = event.id;
+
+        console.log('------------------------------------------------------------------------------------------------');
+        console.log('------------------------------------------------------------------------------------------------');
+        console.log('------------------------------------------------------------------------------------------------');
+        console.log('Elaborazione risultati evento:', event.name, 'con id:', event.id, 'con numero round:', numeroRound);
+
+        // Chiamata per ottenere le sessioni dell'ultimo evento
+        const sessionsResponse = await fetch(`https://api.motogp.pulselive.com/motogp/v1/results/sessions?eventUuid=${latestEventId}&categoryUuid=${item.championship}`);
+        const sessions = await sessionsResponse.json() as PulseLive_Session[];
+
+        // Leggi tutte le sessioni e lancia la funzione InsertSessionResults
+        let count = 0;
+        for (const session of sessions) {
+          console.log('SESSION --------------------------------------------------------------');
+          console.log('Elaborazione risultati sessione:', session.type, 'id:', session.id, 'con numero round:', numeroRound);
+          try {
+            fetchAndInsertResults(session, count, item.championship_id, numeroRound);
+          } catch (error) {
+            console.error(error);
+          }
+          count++;
+        }
+
+      }
     }
+
+
+
 
 
 

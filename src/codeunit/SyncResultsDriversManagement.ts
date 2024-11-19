@@ -35,7 +35,11 @@ export async function fetchAndInsertResults(session: PulseLive_Session, count: n
         } catch (error) { console.error(error); }
 
         if (team_season_drivers_id) {
-            await insertResultsDriver(team_season_drivers_id, risultato, session, results_racesessionresults.data[0].race_sessions[count], count, position);
+            if (results_racesessionresults.data && results_racesessionresults.data.length > 0 && results_racesessionresults.data[0].race_sessions) {
+                await insertResultsDriver(team_season_drivers_id, risultato, session, results_racesessionresults.data[0].race_sessions[count], count, position);
+            } else {
+                console.error('Nessun risultato trovato per la sessione:', session.id);
+            }
         }
     }
 }
