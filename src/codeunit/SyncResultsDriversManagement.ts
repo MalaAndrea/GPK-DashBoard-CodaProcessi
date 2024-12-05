@@ -15,23 +15,20 @@ type race_sessions_results = {
 export async function fetchAndInsertResults(session: PulseLive_Session, count: number, currentSeasonId: string | null, numeroRound: number) {
 
     if (!currentSeasonId) { return; }
-    // Logica per inserire i risultati della sessione
-    const risultatiResponse = await fetch(`https://api.motogp.pulselive.com/motogp/v1/results/session/${session.id}/classification`);
-    const risultatiData = await risultatiResponse.json() as any;
-    const risultati: PulseLive_ClassificationEntry[] = risultatiData.classification || [];
+
+    // prendo i risultati della sessione
+    const risultati = await getSessionResult(session.id);
 
     const results_racesessionresults = await api.get(`/races/race-sessions-results?championship_id=${currentSeasonId}&round=${numeroRound}`);
-    console.log('----------------------------------------------------------------------------------');
     console.log('Risultati ottenuti per le gare:', currentSeasonId, numeroRound);
 
-    //await new Promise(resolve => setTimeout(resolve, 10000));
+
     let position = 0;
     for (const risultato of risultati) {
         position++;
-        //console.log(`Rider Name : ${risultato.rider.number} ${currentSeasonId}`);
         let team_season_drivers_id = null;
         try {
-            team_season_drivers_id = await insertDriver(risultato, currentSeasonId,);
+            team_season_drivers_id = await insertDriver(risultato, currentSeasonId);
         } catch (error) { console.error(error); }
 
         if (team_season_drivers_id) {
@@ -41,6 +38,18 @@ export async function fetchAndInsertResults(session: PulseLive_Session, count: n
                 console.error('Nessun risultato trovato per la sessione:', session.id);
             }
         }
+    }
+}
+
+
+async function getSessionResult(SessionId: string) {
+    try {
+        const risultatiResponse = await fetch(`https://api.motogp.pulselive.com/motogp/v1/results/session/${SessionId}/classification`);
+        const risultatiData = await risultatiResponse.json() as any;
+        return risultatiData.classification || [];
+    } catch (error) {
+        console.error('Errore durante il recupero dei risultati:', error);
+        return [];
     }
 }
 
@@ -70,6 +79,17 @@ export async function insertResultsDriver(team_season_drivers_id: string, risult
                 retired: risultato.status === 'INSTND' ? false : true,
                 synchronized: false
             });
+            //cerco il result_driver e se non c'è lo creo
+            const result_driver_get = (await api.get(`/result-drivers?result_id=${result_get[0].id}&team_season_drivers_id=${team_season_drivers_id}`)).data;
+            if (result_driver_get.length === 0) {
+                const result_driver = await api.post('/result-drivers', {
+                    id: uuidv4(),
+                    result_id: result_get[0].id,
+                    team_season_drivers_id: team_season_drivers_id,
+                });
+            }
+
+
         } else {
             const result = await api.post('/results', {
                 id: resultId,
@@ -92,6 +112,7 @@ export async function insertResultsDriver(team_season_drivers_id: string, risult
                     team_season_drivers_id: team_season_drivers_id,
                 });
             }
+            //TODO: in caso di errore eliminare result
         }
 
 
@@ -104,7 +125,9 @@ export async function insertResultsDriver(team_season_drivers_id: string, risult
 }
 
 
-//creare una funzione che in base alla data di oggi usando questa variabile  const oggi = new Date('2024-11-04'); // const oggi = new Date(); // Usa questa riga per tornare alla data attuale deve prendere la data del giovedi e del lunedi e restituirle come un oggetto con due date
+//creare una funzione che in base alla data di oggi usando questa variabile  const oggi = new Date('2024-11-04'); 
+// const oggi = new Date(); 
+// Usa questa riga per tornare alla data attuale deve prendere la data del giovedi e del lunedi e restituirle come un oggetto con due date
 export function getThursdayAndMondayDates(oggi: Date): { thursday: Date, monday: Date } {
     const dayOfWeek = oggi.getDay();
     let thursday: Date;

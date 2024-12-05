@@ -26,8 +26,14 @@ export async function processPulseliveResult(item: ProcessQueue) {
     const oggi = new Date('2024-11-04'); // const oggi = new Date(); // Usa questa riga per tornare alla data attuale
     const treGiorniFa = new Date(oggi.getTime() - 3 * 24 * 60 * 60 * 1000);
 
-    const eventsResponse = await fetch(`https://api.motogp.pulselive.com/motogp/v1/results/events/?seasonUuid=${currentSeasonId}`);
+    const eventsResponse = await fetch(`https://api.motogp.pulselive.com/motogp/v1/results/events?seasonUuid=${currentSeasonId}&categoryUuid=${item.championship}`);
     const allEvents = await eventsResponse.json() as PulseLive_Event[];
+
+    // Verifica se allEvents è un array
+    if (!Array.isArray(allEvents)) {
+        console.error('Errore: allEvents non è un array', allEvents);
+        return; // Esci dalla funzione se non è un array
+    }
 
     //trovo il numero di round dell'ultima gara e escludo i test
     const eventiNonTest = allEvents.filter(event => !event.test);
@@ -101,7 +107,7 @@ export async function processPulseliveResult(item: ProcessQueue) {
           console.log('SESSION --------------------------------------------------------------');
           console.log('Elaborazione risultati sessione:', session.type, 'id:', session.id, 'con numero round:', numeroRound);
           try {
-            fetchAndInsertResults(session, count, item.championship_id, numeroRound);
+            await fetchAndInsertResults(session, count, item.championship_id, numeroRound);
           } catch (error) {
             console.error(error);
           }

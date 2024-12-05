@@ -68,6 +68,15 @@ export function insertResultsDriver(team_season_drivers_id, risultato, session, 
                     retired: risultato.status === 'INSTND' ? false : true,
                     synchronized: false
                 });
+                //cerco il result_driver e se non c'è lo creo
+                const result_driver_get = (yield api.get(`/result-drivers?result_id=${result_get[0].id}&team_season_drivers_id=${team_season_drivers_id}`)).data;
+                if (result_driver_get.length === 0) {
+                    const result_driver = yield api.post('/result-drivers', {
+                        id: uuidv4(),
+                        result_id: result_get[0].id,
+                        team_season_drivers_id: team_season_drivers_id,
+                    });
+                }
             }
             else {
                 const result = yield api.post('/results', {
@@ -90,6 +99,7 @@ export function insertResultsDriver(team_season_drivers_id, risultato, session, 
                         team_season_drivers_id: team_season_drivers_id,
                     });
                 }
+                //TODO: in caso di errore eliminare result
             }
         }
         catch (error) {
@@ -98,7 +108,9 @@ export function insertResultsDriver(team_season_drivers_id, risultato, session, 
         console.log('inserito risultato - posizione:', position);
     });
 }
-//creare una funzione che in base alla data di oggi usando questa variabile  const oggi = new Date('2024-11-04'); // const oggi = new Date(); // Usa questa riga per tornare alla data attuale deve prendere la data del giovedi e del lunedi e restituirle come un oggetto con due date
+//creare una funzione che in base alla data di oggi usando questa variabile  const oggi = new Date('2024-11-04'); 
+// const oggi = new Date(); 
+// Usa questa riga per tornare alla data attuale deve prendere la data del giovedi e del lunedi e restituirle come un oggetto con due date
 export function getThursdayAndMondayDates(oggi) {
     const dayOfWeek = oggi.getDay();
     let thursday;
